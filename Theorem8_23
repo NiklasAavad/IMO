@@ -44,15 +44,11 @@ def theorem_8_23_main(A):
         A[i:C.shape[0] + 2, i:C.shape[0] + 2] = C       # Inserts the sub-matrix into the full matrix by slicing.
 
     print("Matrices used along the way:")
-    print()
     for i, B in enumerate(matrix_list):
+        print(i + 1)
         print(case_list[i])
         print("B matrix:")
         print(B)
-        print("=>")
-        print("Result of submatrix:")
-        print(result_list[i])
-        print()
         print("_______________")
         print()
 
@@ -87,19 +83,18 @@ def theorem_8_23_number_available(A):
     return False
 
 
-# Fixes the submatrix, if there's a 0 in the first entry, by calling on of the two fix methods (case 2 & case 3).
+# Fixes the submatrix, if there's a 0 in the first entry, by calling on of the two fix methods.
 def theorem_8_23_find_number(A, matrix_list, case_list):
     dim = A.shape[0]
     for j in range(dim):
         if A[j, j] != 0:
-            return theorem_8_32_case2(A, j, matrix_list, case_list)
+            return theorem_8_23_case2(A, j, matrix_list, case_list)
     for j in range(dim):
         if A[0, j] != 0:
-            return theorem_8_32_case3(A, j, matrix_list, case_list)
+            return theorem_8_23_case3(A, j, matrix_list, case_list)
     return A
 
 
-# Proof case 1
 def theorem_8_23_case_1(A, matrix_list, result_list, case_list):
     dim = A.shape[0]
     B = np.identity(dim)
