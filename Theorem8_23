@@ -1,0 +1,137 @@
+import numpy as np
+
+
+test_array = np.array([[1, 8], [8, 1]])
+test_array2 = np.array([[1, 5, 2], [5, 3, 0], [2, 0, 5]])
+test_array3 = np.array([[1, 2, 1, 4], [2, 0, 0, 3], [1, 0, 0, 1], [4, 3, 1, 0]])
+test_array4 = np.array([[0, 0, 1, 1], [0, 0, 2, 3], [1, 2, 1, 4], [1, 3, 4, 0]])
+test_array5 = np.array([[0, 1, 1, 1], [1, 0, 1, 1], [1, 1, 0, 1], [1, 1, 1, 0]])
+test_array6 = np.array([[0, 1], [1, 20]])
+aflevering_array = np.array([[2, 0, -2, 0], [0, 2, 0, -2], [-2, 0, 2, 0], [0, -2, 0, 2]])
+niels_array = np.array([[0, 1, 0], [1, 0, 0], [0, 0, 2]])
+
+
+# Transforms symmetric n*n matrices to diagonal n*n matrices.
+# Might add support for fractions in stead of approximations.
+# Might add support for variables a, b, c...
+# Would it be better to keep matrix_list and result_list as field variables?
+
+
+# Main method
+def theorem_8_23_main(A):
+    # Prints the original matrix
+    print("Original matrix:")
+    print(A)
+
+    # Creates space
+    print()
+    print("_______________")
+    print()
+
+    # Creates 3 new list containing the intermediate matrices, the result matrix and the different cases used.
+    matrix_list = list()
+    result_list = list()
+    case_list = list()
+
+    # The main recursive call.
+    theorem_8_23_recursive(A, matrix_list, result_list, case_list)
+
+    # Converts matrix A into a float array for more precision.
+    A = A.astype(np.float32)
+
+    # Sets all sub-matrices back into A
+    for i, C in enumerate(result_list):
+        A[i:C.shape[0] + 2, i:C.shape[0] + 2] = C       # Inserts the sub-matrix into the full matrix by slicing.
+
+    print("Matrices used along the way:")
+    print()
+    for i, B in enumerate(matrix_list):
+        print(case_list[i])
+        print("B matrix:")
+        print(B)
+        print("=>")
+        print("Result of submatrix:")
+        print(result_list[i])
+        print()
+        print("_______________")
+        print()
+
+    # Prints the new diagonal matrix.
+    print("Diagonal matrix:")
+    print(A)
+
+
+# Recursive method
+def theorem_8_23_recursive(A, matrix_list, result_list, case_list):
+    dim = A.shape[0]
+    if dim == 1:
+        return
+    if A[0, 0] == 0:
+        if theorem_8_23_number_available(A):
+            A = theorem_8_23_find_number(A, matrix_list, case_list)
+        else:
+            return  # In case everything on the diagonal and first row and column is 0, we must break the recursion.
+    A = theorem_8_23_case_1(A, matrix_list, result_list, case_list)
+    return theorem_8_23_recursive(A[1:dim, 1:dim], matrix_list, result_list, case_list)   # Recursive call by slicing A
+
+
+# Checks if there exist some non-zero digit on the diagonal or in the first row in matrix A.
+def theorem_8_23_number_available(A):
+    dim = A.shape[0]
+    for j in range(dim):
+        if A[j, j] != 0:
+            return True
+    for j in range(dim):
+        if A[0, j] != 0:
+            return True
+    return False
+
+
+# Fixes the submatrix, if there's a 0 in the first entry, by calling on of the two fix methods (case 2 & case 3).
+def theorem_8_23_find_number(A, matrix_list, case_list):
+    dim = A.shape[0]
+    for j in range(dim):
+        if A[j, j] != 0:
+            return theorem_8_32_case2(A, j, matrix_list, case_list)
+    for j in range(dim):
+        if A[0, j] != 0:
+            return theorem_8_32_case3(A, j, matrix_list, case_list)
+    return A
+
+
+# Proof case 1
+def theorem_8_23_case_1(A, matrix_list, result_list, case_list):
+    dim = A.shape[0]
+    B = np.identity(dim)
+    for i in range(1, dim):
+        B[0, i] = -A[0, i] / A[0, 0]
+    A = np.transpose(B).dot(A).dot(B)
+    matrix_list.append(B)
+    result_list.append(A)
+    case_list.append("Case 1")
+    return A
+
+
+# Might be some easy way to swap two rows, but for now this works
+# Proof case 2
+def theorem_8_23_case2(A, j, matrix_list, case_list):
+    P = np.identity(A.shape[0])
+    P[0, 0] = 0
+    P[j, j] = 0
+    P[0, j] = 1
+    P[j, 0] = 1
+    matrix_list.append(P)
+    case_list.append("Case 2")
+    return P.transpose().dot(A).dot(P)      # Not necessary to transpose here.
+
+
+# Proof case 3
+def theorem_8_23_case3(A, j, matrix_list, case_list):
+    P = np.identity(A.shape[0])
+    P[j, 0] = 1
+    matrix_list.append(P)
+    case_list.append("Case 3")
+    return P.transpose().dot(A).dot(P)
+
+
+theorem_8_23_main(aflevering_array)
